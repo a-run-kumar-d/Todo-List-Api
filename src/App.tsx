@@ -3,10 +3,12 @@ import Home from "./Pages/Home"
 import Signup from "./Pages/Signup"
 import Login from "./Pages/Login"
 import { TaskDataProvider } from "./Data/taskDataContext"
-import { LoginDataProvider } from "./Data/loginDataContext"
+import { AccessTokenProvider } from "./Data/dataContext"
+import { RefreshTrefreshProvider } from "./Data/refreshContext"
 function App() {
   return (
-      <LoginDataProvider>
+    <RefreshTrefreshProvider>
+    <AccessTokenProvider>
       <TaskDataProvider>
         <Routes>
           <Route path="/home" element={<Home />} />
@@ -14,7 +16,8 @@ function App() {
           <Route path="/" element={<Login />} />
         </Routes>
       </TaskDataProvider>
-    </LoginDataProvider>
+    </AccessTokenProvider>
+    </RefreshTrefreshProvider>
   )
 }
 

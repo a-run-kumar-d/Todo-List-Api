@@ -1,19 +1,12 @@
 import { useEffect, useState } from "react";
 import "../styles/common.css"
 import "../styles/other.css"
-import { useLoginData } from "../Data/loginDataContext";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 export default function Login() {  
-    type loginDataType = {
-        name : string;
-        password: string;
-    }
     const navigate = useNavigate();
-    const [signal, setSignal] = useState(false);
-    const {setCredentials} = useLoginData();
     const [alert , setAlert] = useState("");
-    const [Cred, setCred] = useState<loginDataType[]>([]);
     const [userName, setUserName] = useState("");
     const [temp,setTemp] = useState("");
     const [password, setPassword] = useState("");
@@ -25,24 +18,23 @@ export default function Login() {
             setAlert("Password doesn't match");
         }
         else{
-            const newCred = {
-                name: userName,
-                password: password
+            const data = {
+                "username" : userName,
+                "password" : password 
             }
-            setSignal(true);
-            setCred([...Cred, newCred]);
+            axios.post("https://www.mulearn.org/api/v1/mulearn-task/register/",data).then((res)=>{
+                console.log(res);
+                navigate("/");
+            }).catch(()=>{
+                setAlert("Username already exists");
+            })
+
         }
         setUserName("");
         setPassword("");
         setTemp("");
         
     }
-    useEffect(()=>{
-        setCredentials(Cred);
-        if(signal){
-            navigate("/home");
-        }
-    },[Cred])
     return (
         <>
             <div className="bgContainer" id="bgSignup"></div>

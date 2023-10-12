@@ -1,13 +1,17 @@
-import { ReactNode, createContext, useContext, useState } from "react";
-import { useLocalStorage } from "../Hooks/useLocalStorage";
-
+import axios from "axios";
+import { ReactNode, createContext, useContext, useEffect, useState } from "react";
+import { useTokenData } from "./dataContext";
+import { useTrefreshData } from "./refreshContext";
 type TaskDataProvidertype = {
     children: ReactNode;
 }
 type taskType = {
-    id: number
-    task: string
-    status: boolean
+    id: number,
+    title: string,
+    isCompleted: boolean,
+    updated: string,
+    created: string,
+    host: number
 }
 type TaskData = {
     getTasks: (value: string) => taskType[];
@@ -24,38 +28,59 @@ export function useTaskData(){
 }
 
 export function TaskDataProvider({children}: TaskDataProvidertype){
-    const [tasks, setTasks] = useLocalStorage<taskType[]>("tasks",[]);
+    const {gettrefresh} = useTrefreshData();
+    const {gettoken} = useTokenData();
+    const [atoken , setAtoken] = useState<string>("");
+    const [tasks, setTasks] = useState<taskType[]>([]);
+    useEffect((): void => {
+         async ()=>{
+            const refreshURL = "https://www.mulearn.org/api/v1/mulearn-task/token/refresh/"
+            const refreshToken = {refresh : gettrefresh()}
+            await axios.post(refreshURL,refreshToken,{
+                headers:{
+                    "Content-Type": "application/json"
+                }
+            }).then((res: any)=>{console.log(res)}).catch((err)=>{console.log(err)});
+         }
+         console.log(atoken);
+        //  console.log(axios.get("https://www.mulearn.org/api/v1/mulearn-task/todo/",{
+        //     headers: {
+        //     "Content-Type": "application/json",
+        //     "Authorization" : `Bearer ${atoken}`
+        //     }
+        // }).then((res)=>{console.log(res.data)}).catch((err)=>{console.log(err)}))
+    },[]);
     function getTasks(value: string){
         if(value === "active"){
-            return tasks.filter(task => task.status === true);
+            return tasks.filter(task => task.isCompleted === true);
         }
         else if(value === "completed"){
-            return tasks.filter(task => task.status === false);
+            return tasks.filter(task => task.isCompleted === false);
         }
         else{
             return tasks;
         }
     }
     function createTask(task: string){
-        const newTask = {
-            id: Math.random(),
-            task: task,
-            status: true
-        }
-        setTasks([...tasks, newTask]);
-    }
+        const newTask = {title : task}
+        console.log(axios.post("https://www.mulearn.org/api/v1/mulearn-task/todo/",newTask,{
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization" : `Bearer ${gettoken()}`
+            }
+        }).then((res)=>{console.log(res.data)}).catch((err)=>{console.log(err)}))}
     function deleteTask(id: number){
         const newTasks = tasks.filter(task => task.id !== id);
         setTasks(newTasks);
     }
     function readStatus(id: number){
         const task = tasks.find(task => task.id === id);
-        return task?.status;
+        return task?.isCompleted;
     }
     function updateStatus(id: number){
         const updatedTasks = tasks.map(task => {
             if(task.id === id){
-                return { ...task, status: !task.status };
+                return { ...task, status: !task.isCompleted };
             }
             return task;
         })

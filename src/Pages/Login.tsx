@@ -1,45 +1,43 @@
 import { Link, useNavigate } from "react-router-dom"
 import "../styles/common.css"
 import "../styles/other.css"
-import { useEffect, useState } from "react";
-import { useLoginData } from "../Data/loginDataContext";
+import { useContext, useEffect, useState } from "react";
+import axios from "axios";
+import { useTokenData } from "../Data/dataContext";
+import { useTrefreshData } from "../Data/refreshContext";
 export default function Login() { 
-    type loginDataType = {
-        name : string;
-        password: string;
-    }
+    const {settoken} = useTokenData();
+    const {settrefresh} = useTrefreshData();
     const navigate = useNavigate();
-    const [signal, setSignal] = useState(false);
-    const {verifyCredentials} = useLoginData();
     const [alert , setAlert] = useState("");
-    const [Cred, setCred] = useState<loginDataType[]>([]);
     const [userName, setUserName] = useState("");
     const [password, setPassword] = useState("");
+    // useEffect(()=>{
+    //     console.log(token);
+    // },[token])
     function handleLoginSubmit(){
         if(userName === "" || password === ""){
             setAlert("Please fill all the fields");
         }
         else{
-            const newCred = {
-                name: userName,
-                password: password
+            const data = {
+                "username" : userName,
+                "password" : password 
             }
-            setSignal(true);
-            setCred([newCred]);
+            axios.post("https://www.mulearn.org/api/v1/mulearn-task/login/",data,{
+                headers: {
+                    "Content-Type": "application/json"
+            }}).then((res)=>{
+                const tok = res.data.access;
+                settrefresh(res.data.refresh);
+                settoken(tok);
+                navigate("/home");
+            }).catch(()=>{
+                setAlert("invalid credentials");
+            })
+            
         }
     }
-    useEffect(()=>{
-        if(signal){
-            if(verifyCredentials(Cred)){
-                navigate("/home");
-            }
-            else{
-                setUserName("");
-                setPassword("");
-                setAlert("Invalid Credentials");
-            }
-        }
-    },[Cred])
     return (
         <>
             <div className="bgContainer" id="bgLogin"></div>

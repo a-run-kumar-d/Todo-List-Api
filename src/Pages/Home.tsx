@@ -43,7 +43,7 @@ export default function Home() {
                         <button className={`sortButton ${sortValue==='completed' ?'activeState' : ''}`} id="completedButton" onClick={()=>{handleSort("completed")}}>Completed</button>
                     </div>
                     <button className="sortButton" id="clearButton" onClick={() => {
-                        const ids = tasks.filter(task => task.status === false).map(task => task.id);
+                        const ids = tasks.filter(task => task.isCompleted === false).map(task => task.id);
                         deleteMultipleTasks(ids);
                     }}>Clear Completed</button>
                 </div>    
