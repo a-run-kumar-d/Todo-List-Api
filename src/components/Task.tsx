@@ -15,7 +15,7 @@ export default function task({id, title, isCompleted, updated, created, host }: 
   return (
     <>
       <div className="taskBar">
-        {/* {status === true ? (
+        {isCompleted === false ? (
           <button className="statusButton" id="ActivedButton" onClick={()=>{
             updateStatus(id)
           }}></button>
@@ -25,8 +25,8 @@ export default function task({id, title, isCompleted, updated, created, host }: 
           }}><img src={TickIcon} id="tick-icon" ></img></button>
         )}
 
-        <div className={`taskDetail ${status=== false ?'completedState' : ''}`}>{task}</div>
-        <button className="deleteButton" onClick={()=>{deleteTask(id)}}><img src={CrossIcon} id="cross-icon"></img></button> */}
+        <div className={`taskDetail ${isCompleted=== true ?'completedState' : ''}`}>{title}</div>
+        <button className="deleteButton" onClick={()=>{deleteTask(id)}}><img src={CrossIcon} id="cross-icon"></img></button>
       </div>
     </>
   );

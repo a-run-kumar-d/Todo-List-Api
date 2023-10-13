@@ -32,30 +32,18 @@ export function TaskDataProvider({children}: TaskDataProvidertype){
     const {gettoken} = useTokenData();
     const [atoken , setAtoken] = useState<string>("");
     const [tasks, setTasks] = useState<taskType[]>([]);
-    useEffect((): void => {
-         async ()=>{
-            const refreshURL = "https://www.mulearn.org/api/v1/mulearn-task/token/refresh/"
-            const refreshToken = {refresh : gettrefresh()}
-            await axios.post(refreshURL,refreshToken,{
-                headers:{
-                    "Content-Type": "application/json"
-                }
-            }).then((res: any)=>{console.log(res)}).catch((err)=>{console.log(err)});
-         }
-         console.log(atoken);
-        //  console.log(axios.get("https://www.mulearn.org/api/v1/mulearn-task/todo/",{
-        //     headers: {
-        //     "Content-Type": "application/json",
-        //     "Authorization" : `Bearer ${atoken}`
-        //     }
-        // }).then((res)=>{console.log(res.data)}).catch((err)=>{console.log(err)}))
-    },[]);
     function getTasks(value: string){
+        axios.get("https://www.mulearn.org/api/v1/mulearn-task/todo/",{
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization" : `Bearer ${gettoken()}`
+            }
+        }).then((res)=>{setTasks(res.data)}).catch((err)=>{console.log(err)})
         if(value === "active"){
-            return tasks.filter(task => task.isCompleted === true);
+            return tasks.filter(task => task.isCompleted === false);
         }
         else if(value === "completed"){
-            return tasks.filter(task => task.isCompleted === false);
+            return tasks.filter(task => task.isCompleted === true);
         }
         else{
             return tasks;
@@ -63,32 +51,43 @@ export function TaskDataProvider({children}: TaskDataProvidertype){
     }
     function createTask(task: string){
         const newTask = {title : task}
-        console.log(axios.post("https://www.mulearn.org/api/v1/mulearn-task/todo/",newTask,{
+        axios.post("https://www.mulearn.org/api/v1/mulearn-task/todo/",newTask,{
+            headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization" : `Bearer ${gettoken()}`
+            }
+        }).then((res)=>{console.log(res.data)}).catch((err)=>{console.log(err)})
+        getTasks("all");
+    }
+    function deleteTask(id: number){
+        axios.delete(`https://www.mulearn.org/api/v1/mulearn-task/todo/${id}/`,{
             headers: {
             "Content-Type": "application/json",
             "Authorization" : `Bearer ${gettoken()}`
             }
-        }).then((res)=>{console.log(res.data)}).catch((err)=>{console.log(err)}))}
-    function deleteTask(id: number){
-        const newTasks = tasks.filter(task => task.id !== id);
-        setTasks(newTasks);
+        }).then((res)=>{console.log(res.data)}).catch((err)=>{console.log(err)})
     }
     function readStatus(id: number){
         const task = tasks.find(task => task.id === id);
         return task?.isCompleted;
     }
     function updateStatus(id: number){
-        const updatedTasks = tasks.map(task => {
-            if(task.id === id){
-                return { ...task, status: !task.isCompleted };
+        axios.put(`https://www.mulearn.org/api/v1/mulearn-task/todo/${id}/`,null,{
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization" : `Bearer ${gettoken()}`
             }
-            return task;
-        })
-        setTasks([...updatedTasks]);
-    }
+        }).then((res)=>{console.log(res.data)}).catch((err)=>{console.log(err)})
+        }
     function deleteMultipleTasks(ids: number[]){
-        const newTasks = tasks.filter(task => !ids.includes(task.id));
-        setTasks([...newTasks]);
+        ids.map((id)=>{
+            axios.delete(`https://www.mulearn.org/api/v1/mulearn-task/todo/${id}/`,{
+            headers: {
+            "Content-Type": "application/json",
+            "Authorization" : `Bearer ${gettoken()}`
+            }
+        }).then((res)=>{console.log(res.data)}).catch((err)=>{console.log(err)})
+        })
     }
     return(
         <taskDataContext.Provider value={{getTasks, createTask , deleteTask, readStatus, updateStatus ,deleteMultipleTasks}}>

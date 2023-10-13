@@ -2,12 +2,15 @@ import "../styles/home.css"
 import "../styles/common.css"
 import Task from "../components/Task"
 import { useTaskData } from "../Data/taskDataContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
     const [sortValue, setSortValue] = useState("all")
     const {getTasks, createTask ,deleteMultipleTasks} = useTaskData();
-    const tasks = getTasks(sortValue);
+    let tasks = getTasks(sortValue);
+    useEffect(()=>{
+        tasks = getTasks(sortValue);
+    },[])
     function handleText(e: React.KeyboardEvent<HTMLInputElement>) {
         if (e.key === "Enter") {
           createTask(e.currentTarget.value);
@@ -27,7 +30,6 @@ export default function Home() {
             <div className="taskContainer">
                 <div className="taskList">
                     {tasks.map((task)=>{
-                        console.log(task)
                         return(
                         <Task {...task} />
 
@@ -43,10 +45,11 @@ export default function Home() {
                         <button className={`sortButton ${sortValue==='completed' ?'activeState' : ''}`} id="completedButton" onClick={()=>{handleSort("completed")}}>Completed</button>
                     </div>
                     <button className="sortButton" id="clearButton" onClick={() => {
-                        const ids = tasks.filter(task => task.isCompleted === false).map(task => task.id);
+                        const ids = tasks.filter(task => task.isCompleted === true).map(task => task.id);
                         deleteMultipleTasks(ids);
                     }}>Clear Completed</button>
-                </div>    
+                </div> 
+  
             </div>
         </div>
           

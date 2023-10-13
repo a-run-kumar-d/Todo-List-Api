@@ -18,9 +18,9 @@ export function useTokenData(){
 }
 export function AccessTokenProvider({children}: AccessTokenProviderType){
     const [token, setToken] = useLocalStorage<AccessTokentype>("token",{token : ""});
-    // useEffect(()=>{
-    //     console.log(token);
-    // },[token])
+    useEffect(()=>{
+        console.log(token);
+    },[token])
     function gettoken(){
         return token.token;
     }
